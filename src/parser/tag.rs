@@ -228,6 +228,7 @@ pub struct HTMLTag<'a> {
     pub(crate) _name: Bytes<'a>,
     pub(crate) _attributes: Attributes<'a>,
     pub(crate) _children: RawChildren,
+    pub(crate) _parent: Option<NodeHandle>,
     pub(crate) _raw: Bytes<'a>,
 }
 
@@ -238,14 +239,21 @@ impl<'a> HTMLTag<'a> {
         name: Bytes<'a>,
         attr: Attributes<'a>,
         children: InlineVec<NodeHandle, INLINED_SUBNODES>,
+        parent: Option<NodeHandle>,
         raw: Bytes<'a>,
     ) -> Self {
         Self {
             _name: name,
             _attributes: attr,
             _children: children,
+            _parent: parent,
             _raw: raw,
         }
+    }
+
+    /// Returns the parent of this HTML tag, if present
+    pub fn parent(&self) -> Option<NodeHandle> {
+        self._parent
     }
 
     /// Returns a wrapper around the children of this HTML tag

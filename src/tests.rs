@@ -611,6 +611,43 @@ mod query_selector {
 
         assert_eq!(value, Some("hello".to_string()));
     }
+
+    #[test]
+    fn query_selector_parent() {
+        let input = r#"<div><p class="hi">hello</p></div>"#;
+        let dom = parse(input, ParserOptions::default()).unwrap();
+        let parser = dom.parser();
+        let mut selector = dom.query_selector("div > .hi").unwrap();
+        let el = force_as_tag(selector.next().and_then(|x| x.get(parser)).unwrap());
+
+        assert_eq!(el.inner_text(parser), "hello");
+    }
+
+    #[test]
+    fn query_selector_parent_nested() {
+        let input = r#"<div><p class="hi"><span>hello</span></p></div>"#;
+        let dom = parse(input, ParserOptions::default()).unwrap();
+        let parser = dom.parser();
+        let mut selector = dom.query_selector("div > .hi > span").unwrap();
+        let el = force_as_tag(selector.next().and_then(|x| x.get(parser)).unwrap());
+
+        assert_eq!(el.inner_text(parser), "hello");
+    }
+
+    #[test]
+    fn query_selector_complex_list() {
+        let input = r#"<main><div><p class="hello world" id="id"><span>cond1</span><section>cond2</section></p></div></main>"#;
+        let dom = parse(input, ParserOptions::default()).unwrap();
+        let parser = dom.parser();
+        let selector = dom
+            .query_selector("div > .hello.world#id > span, main section")
+            .unwrap();
+        let texts = selector
+            .map(|x| String::from(x.get(parser).unwrap().inner_text(parser)))
+            .collect::<Vec<_>>();
+
+        assert_eq!(texts, vec![String::from("cond1"), String::from("cond2")]);
+    }
 }
 
 #[test]
