@@ -12,6 +12,8 @@ use std::{collections::HashMap, mem::MaybeUninit};
 #[derive(Debug, Clone)]
 pub struct InlineHashMap<K, V, const N: usize>(InlineHashMapInner<K, V, N>);
 
+type InlinePartsMut<'a, K, V, const N: usize> = (&'a mut [MaybeUninit<(K, V)>; N], usize);
+
 impl<K, V, const N: usize> InlineHashMap<K, V, N>
 where
     K: Hash + Eq,
@@ -25,6 +27,12 @@ where
     #[inline]
     pub fn len(&self) -> usize {
         self.0.len()
+    }
+
+    /// Checks whether the map is empty
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     /// Returns an iterator over the elements of this map
@@ -41,7 +49,7 @@ where
     ///
     /// Only the first `.1` elements are initialized.
     #[inline]
-    pub fn inline_parts_mut(&mut self) -> Option<(&mut [MaybeUninit<(K, V)>; N], usize)> {
+    pub fn inline_parts_mut(&mut self) -> Option<InlinePartsMut<K, V, N>> {
         self.0.inline_parts_mut()
     }
 
@@ -168,7 +176,7 @@ impl<K, V, const N: usize> InlineHashMapInner<K, V, N> {
     }
 
     #[inline]
-    pub fn inline_parts_mut(&mut self) -> Option<(&mut [MaybeUninit<(K, V)>; N], usize)> {
+    pub fn inline_parts_mut(&mut self) -> Option<InlinePartsMut<K, V, N>> {
         match self {
             Self::Heap(_) => None,
             Self::Inline { len, data } => Some((data, *len)),
@@ -186,7 +194,7 @@ impl<K, V, const N: usize> InlineHashMapInner<K, V, N> {
             InlineHashMapInner::Inline { len, data } => {
                 let mut new_data = HashMap::with_capacity(*len);
 
-                let iter = data.into_iter().take(*len);
+                let iter = data.iter().take(*len);
 
                 for element in iter {
                     let element = unsafe { &*element.as_ptr() };
@@ -286,7 +294,6 @@ impl<K: Eq + Hash, V, const N: usize> InlineHashMapInner<K, V, N> {
 
             // do not call the destructor!
             unsafe { ptr::write(self, new_heap) };
-            return;
         } else {
             array[*len].write((k, v));
             *len += 1;

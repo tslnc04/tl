@@ -1,5 +1,3 @@
-use crate::util;
-
 /// Fallback functions, used for the last chunk not divisible by the chunk sice
 pub mod fallback;
 /// nightly-only functions using portable_simd
@@ -65,7 +63,7 @@ pub fn matches_case_insensitive<const N: usize>(haystack: &[u8], needle: [u8; N]
 
     let mut mask = true;
     for i in 0..N {
-        mask &= util::to_lower(haystack[i]) == needle[i];
+        mask &= haystack[i].to_ascii_lowercase() == needle[i];
     }
     mask
 }

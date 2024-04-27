@@ -225,7 +225,7 @@ impl VDomGuard {
     /// Returns a reference to the inner DOM.
     ///
     /// The lifetime of the returned `VDom` is bound to self so that elements cannot outlive this `VDomGuard` struct.
-    pub fn get_ref<'a>(&'a self) -> &'a VDom<'a> {
+    pub fn get_ref(&self) -> &VDom<'_> {
         &self.dom
     }
 

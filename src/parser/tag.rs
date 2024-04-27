@@ -181,11 +181,11 @@ impl<'a> Attributes<'a> {
             })
             .chain([
                 (
-                    self.id.is_some().then(|| Cow::Borrowed("id")),
+                    self.id.is_some().then_some(Cow::Borrowed("id")),
                     self.id.as_ref().map(|x| x.as_utf8_str()),
                 ),
                 (
-                    self.class.is_some().then(|| Cow::Borrowed("class")),
+                    self.class.is_some().then_some(Cow::Borrowed("class")),
                     self.class.as_ref().map(|x| x.as_utf8_str()),
                 ),
             ])

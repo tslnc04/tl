@@ -161,7 +161,7 @@ pub fn children_mut() {
 
     let mut children = child.children_mut();
     let top = children.top_mut();
-    let handle = top[0].clone();
+    let handle = top[0];
     let node = handle.get_mut(dom.parser_mut()).unwrap();
     *node = Node::Raw("Hello".into());
 
@@ -186,8 +186,8 @@ fn nested_inner_text() {
 fn owned_dom() {
     let owned_dom = {
         let input = String::from("<p id=\"test\">hello</p>");
-        let dom = unsafe { parse_owned(input, ParserOptions::default()).unwrap() };
-        dom
+        
+        unsafe { parse_owned(input, ParserOptions::default()).unwrap() }
     };
 
     let dom = owned_dom.get_ref();
@@ -591,9 +591,7 @@ mod query_selector {
         let node_option = dom
             .query_selector(r#"meta[property="og:title"]"#)
             .and_then(|mut iter| iter.next());
-        let value = if let Some(node) = node_option {
-            Some(
-                node.get(parser)
+        let value = node_option.map(|node| node.get(parser)
                     .unwrap()
                     .as_tag()
                     .unwrap()
@@ -603,11 +601,7 @@ mod query_selector {
                     .unwrap()
                     .try_as_utf8_str()
                     .unwrap()
-                    .to_string(),
-            )
-        } else {
-            None
-        };
+                    .to_string());
 
         assert_eq!(value, Some("hello".to_string()));
     }

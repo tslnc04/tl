@@ -65,7 +65,7 @@ impl<'a, T> Stream<'a, T> {
     /// Returns a reference to the underlying slice
     #[inline]
     pub fn data(&self) -> &[T] {
-        &self.data
+        self.data
     }
 
     #[inline]

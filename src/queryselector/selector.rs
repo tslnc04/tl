@@ -35,7 +35,7 @@ pub enum Selector<'a> {
 
 impl<'a> Selector<'a> {
     /// Checks if the given node matches this selector
-    pub fn matches<'b>(&self, node: &Node<'b>) -> bool {
+    pub fn matches(&self, node: &Node<'_>) -> bool {
         match self {
             Self::Tag(tag) => node.as_tag().map_or(false, |t| t._name.as_bytes().eq(*tag)),
             Self::Id(id) => node
